@@ -1,23 +1,25 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Alert,
   Image,
   SafeAreaView,
   ScrollView,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
+import { Entypo, MaterialIcons } from '@expo/vector-icons';
 
 import { styles } from "./styles";
 
 import { Tip } from "../../components/Tip";
 import { Item, ItemProps } from "../../components/Item";
-import { Button } from "../../components/Button";
 import { api } from "../../services/api";
 import { Loading } from "../../components/Loading";
 import { foodContains } from "../../utils/foodContain";
+import { StatusBar } from "expo-status-bar";
 
 export function Home() {
   const [selectedImageUri, setSelectedImageUri] = useState("");
@@ -102,45 +104,64 @@ export function Home() {
 
   return (
     <View style={styles.container}>
-      <Button onPress={handleSelectImage} disabled={isLoading} />
+      <StatusBar style="light" />
+
 
       {selectedImageUri ? (
-        <Image
-          source={{ uri: selectedImageUri }}
-          style={styles.image}
-          resizeMode="cover"
-        />
+        <View
+          style={styles.containerImage}
+        >
+          <Image
+            source={{ uri: selectedImageUri }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+          <TouchableOpacity style={styles.buttonEdit} onPress={handleSelectImage}>
+            <Entypo name="edit" size={24} color="#001F77" />
+          </TouchableOpacity>
+        </View>
       ) : (
-        <Text style={styles.description}>
-          Selecione a foto do seu prato para analizar.
-        </Text>
+        <TouchableOpacity style={styles.selectImage} onPress={handleSelectImage}>
+          <MaterialIcons
+            name="add-a-photo"
+            color="#FFF"
+            size={50}
+          />
+          <Text style={styles.description}>
+            Selecione a foto do seu prato para analizar.
+          </Text>
+        </TouchableOpacity>
       )}
 
-      <View style={styles.bottom}>
-        {
-          isLoading ? <Loading /> :
-            <>
-              {
-                message && (
-                  <Tip message={message} />
-                )
-              }
-
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingVertical: 24 }}
-              >
-                <View style={styles.items}>
+      {
+        selectedImageUri && (
+          <View style={styles.bottom}>
+            {
+              isLoading ? <Loading /> :
+                <>
                   {
-                    items.map((item) => (
-                      <Item key={item.name} data={item} />
-                    ))
+                    message && (
+                      <Tip message={message} />
+                    )
                   }
-                </View>
-              </ScrollView>
-            </>
-        }
-      </View>
+
+                  <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingVertical: 24 }}
+                  >
+                    <View style={styles.items}>
+                      {
+                        items.map((item) => (
+                          <Item key={item.name} data={item} />
+                        ))
+                      }
+                    </View>
+                  </ScrollView>
+                </>
+            }
+          </View>
+        )
+      }
     </View>
   );
 }
